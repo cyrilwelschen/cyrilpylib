@@ -13,7 +13,7 @@ def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=No
     :return: List of only the file names (not paths)
     """
     if contains and contains_any or contains and contains_all or contains_any and contains_all:
-        raise AttributeError('Specify only one of "contains", "contains_any" or "contains_all".')
+        raise AttributeError('Specify only one of "contains", "contains_any" or "contains_all" parameters.')
     if suffix and suffix_any:
         raise AttributeError('Specify either "suffix" or "suffix_any" parameter, not both.')
 

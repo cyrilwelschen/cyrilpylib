@@ -1,0 +1,7 @@
+Stupid import of 'package':
+
+import sys
+sys.path.append('path_to/cyril_py_lib')
+from package_test import hello
+
+hello()
