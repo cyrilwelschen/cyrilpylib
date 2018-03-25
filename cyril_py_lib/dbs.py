@@ -1,5 +1,6 @@
 import sqlite3 as sql
 from sqlite3 import OperationalError
+from sqlite3 import IntegrityError
 import os
 
 
@@ -30,33 +31,32 @@ class Database:
         except OperationalError:
             self.working_table = None
 
-    def create_table(self, table_name, list_of_col_names, list_of_col_types):
-        # todo: can be made much smaller b/c now we are in class!
+    def create_table(self, table_name, list_of_col_names, list_of_col_types, unique_combination=None):
         self.working_table = table_name
+        """
         supported_types = ["text", "integer", "real", "blob"]
         for t in list_of_col_types:
             if t not in supported_types:
                 raise TypeError("{} not in list of supported database types: {}".format(t, supported_types))
-        connection = sql.connect(self.db_path)
-        cursor = connection.cursor()
         # todo: option to recreate
         # todo: handle existing table
         # cursor.execute("DROP TABLE IF EXISTS {}".format(table_name))
-        create_table_string = self.creation_string(list_of_col_names, list_of_col_types)
-        cursor.execute(create_table_string)
-        connection.commit()
-        connection.close()
+        """
+        create_table_string = self.creation_string(list_of_col_names, list_of_col_types, unique_combination)
+        try:
+            self.c.execute(create_table_string)
+        except OperationalError as e:
+            print(create_table_string)
+            raise e
+        self.commit()
 
-    def check_if_table_exists(self):
-        pass
-
-    def exe(self):
-        pass
+    def check_if_table_exists(self, name):
+        return name in self.tables()
 
     def commit(self):
         self.con.commit()
 
-    def close_db(self):
+    def close(self):
         self.con.close()
 
     def recreate_table(self, table_to_recreate):
@@ -99,17 +99,21 @@ class Database:
         cursor = self.con.execute("select * from {}".format(self.working_table))
         return [d for d in cursor.description]
 
-    def creation_string(self, col_names, col_types):
+    def creation_string(self, col_names, col_types, unique_combination):
         nr_names = len(col_names)
         nr_types = len(col_types)
         assert_msg = "Name and type list don't have same length: "
         assert nr_names == nr_types, assert_msg + "{} names and {} types provided".format(nr_names, nr_types)
-        # todo: alternative when already exists
         prefix = "CREATE TABLE IF NOT EXISTS {} ".format(self.working_table)
         bracket = "("
         for n, t in zip(col_names, col_types):
             bracket += "{} {},".format(n, t)
         bracket = bracket[:-1] + ")"
+        if unique_combination:
+            err_msg = "only tuple of unique constraint implemented so far. Provided {}".format(len(unique_combination))
+            assert len(unique_combination) == 2, err_msg
+            append = ", constraint unique_combination unique ({}, {})".format(unique_combination[0], unique_combination[1])
+            bracket = bracket[:-1] + append + ")"
         return prefix + bracket
 
     def write_entry(self, *args):
@@ -122,6 +126,11 @@ class Database:
         except OperationalError as e:
             print(string)
             raise e
+        except IntegrityError as e:
+            if e.__str__()[:6] == "UNIQUE":
+                pass
+            else:
+                raise e
 
     def query_column(self, col_name):
         string = "select {} from {}".format(col_name, self.working_table)
@@ -135,7 +144,7 @@ class Database:
         except OperationalError as e:
             print(string)
             raise e
-        return self.c.fetchall()
+        return [list(i) for i in self.c.fetchall()]
 
     @staticmethod
     def string_with_dic_and(*columns_values):
