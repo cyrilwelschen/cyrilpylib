@@ -112,7 +112,8 @@ class Database:
         if unique_combination:
             err_msg = "only tuple of unique constraint implemented so far. Provided {}".format(len(unique_combination))
             assert len(unique_combination) == 2, err_msg
-            append = ", constraint unique_combination unique ({}, {})".format(unique_combination[0], unique_combination[1])
+            u1, u2 = unique_combination[0], unique_combination[1]
+            append = ", constraint unique_combination unique ({}, {})".format(u1, u2)
             bracket = bracket[:-1] + append + ")"
         return prefix + bracket
 
@@ -170,4 +171,5 @@ class Database:
         return r[:-1]
 
     def write_entries(self):
+        # todo: implement if necessary
         pass
