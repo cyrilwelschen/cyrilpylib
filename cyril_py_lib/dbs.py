@@ -24,6 +24,11 @@ class Database:
         self.working_table = None
         self.guess_working_table()
 
+    def open(self):
+        self.con = sql.connect(self.db_path)
+        self.c = self.con.cursor()
+        self.guess_working_table()
+
     def guess_working_table(self):
         try:
             table_names = self.tables()
