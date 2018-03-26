@@ -30,7 +30,7 @@ class Logger:
     def log(self, string):
         self.log_count += 1
         date_time = strftime("%Y-%m-%d %H:%M")
-        prefix = '[{} -- LOGGING]   '.format(date_time)
+        prefix = '[{} -- logging]   '.format(date_time)
         self.write(self.log_file, prefix + string)
 
     def err(self, string):
