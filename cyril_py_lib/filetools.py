@@ -1,7 +1,7 @@
 import os
 
 
-def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=None, contains_all=None):
+def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=None, contains_all=None, return_full_path=False):
     """
     Potentially filtered file names from path
     :param path: String absolute or relative (from execution place) path
@@ -38,4 +38,7 @@ def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=No
             len_suffix = len(s)
             files_to_return += [f for f in files if f[-1*len_suffix:] == s]
         files = files_to_return
-    return files
+    if return_full_path:
+        return [os.path.join(path, f) for f in files]
+    else:
+        return files
