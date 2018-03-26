@@ -28,7 +28,7 @@ class Database:
         try:
             table_names = self.tables()
             self.working_table = table_names[0]
-        except OperationalError:
+        except (OperationalError, IndexError):
             self.working_table = None
 
     def create_table(self, table_name, list_of_col_names, list_of_col_types, unique_combination=None):
