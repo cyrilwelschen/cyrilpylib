@@ -8,6 +8,8 @@ class Logger:
         self.log_file = os.path.join(path_to_files, "log.txt")
         self.err_file = os.path.join(path_to_files, "err.txt")
         self.create_files()
+        self.log_count = 0
+        self.err_count = 0
 
     def create_files(self):
         date = strftime("%d.%m.%Y")
@@ -26,7 +28,21 @@ class Logger:
         f.close()
 
     def log(self, string):
-        self.write(self.log_file, string)
+        self.log_count += 1
+        date_time = strftime("%Y-%m-%d %H:%M")
+        prefix = '[{} -- LOGGING]   '.format(date_time)
+        self.write(self.log_file, prefix + string)
 
     def err(self, string):
-        self.write(self.err_file, string)
+        self.log_count += 1
+        self.err_count += 1
+        date_time = strftime("%Y-%m-%d %H:%M")
+        prefix = '[{} -- WARNING]   '.format(date_time)
+        self.write(self.err_file, prefix + string)
+        self.write(self.log_file, prefix + string)
+
+    def log_counter(self):
+        return self.log_count
+
+    def err_counter(self):
+        return self.err_count
