@@ -33,15 +33,6 @@ class Database:
 
     def create_table(self, table_name, list_of_col_names, list_of_col_types, unique_combination=None):
         self.working_table = table_name
-        """
-        supported_types = ["text", "integer", "real", "blob"]
-        for t in list_of_col_types:
-            if t not in supported_types:
-                raise TypeError("{} not in list of supported database types: {}".format(t, supported_types))
-        # todo: option to recreate
-        # todo: handle existing table
-        # cursor.execute("DROP TABLE IF EXISTS {}".format(table_name))
-        """
         create_table_string = self.creation_string(list_of_col_names, list_of_col_types, unique_combination)
         try:
             self.c.execute(create_table_string)
