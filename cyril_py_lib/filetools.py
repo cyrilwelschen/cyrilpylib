@@ -1,7 +1,10 @@
-import os
+from os import listdir
+import os.path
+import time
 
 
-def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=None, contains_all=None, return_full_path=False):
+def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=None, contains_all=None,
+              return_full_path=False):
     """
     Potentially filtered file names from path
     :param path: String absolute or relative (from execution place) path
@@ -10,6 +13,7 @@ def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=No
     :param contains_all:  List of strings (analogue to contains parameter) Can't use in combination other 'contains'
     :param contains_any: List of strings (analogue to contains parameter) Can't use in combination with 'contains'
     :param suffix_any: List of strings (analogue to suffix parameter) Can't use in combination with 'suffix'
+    :param return_full_path: If set to True, returns list of valid paths, else only file names.
     :return: List of only the file names (not paths)
     """
     if contains and contains_any or contains and contains_all or contains_any and contains_all:
@@ -17,7 +21,7 @@ def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=No
     if suffix and suffix_any:
         raise AttributeError('Specify either "suffix" or "suffix_any" parameter, not both.')
 
-    files = os.listdir(path)
+    files = listdir(path)
     if contains:
         files = [f for f in files if contains in f]
     if suffix:
@@ -42,3 +46,10 @@ def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=No
         return [os.path.join(path, f) for f in files]
     else:
         return files
+
+
+def file_info(path):
+    mod_date = time.ctime(os.path.getmtime(path))
+    cre_date = time.ctime(os.path.getctime(path))
+    size = os.path.getsize(path)/1024.0
+    return "Last modified: {}\t Created: {}\t Size: {} KB".format(mod_date, cre_date, size)
