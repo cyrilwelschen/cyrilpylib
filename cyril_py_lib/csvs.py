@@ -54,7 +54,10 @@ def csv_from_excel(path_to_excel):
     wb = xlrd.open_workbook(path_to_excel)
     shs = wb.sheet_names()
     sh = wb.sheet_by_name(shs[0])
-    new_csv = open(path_to_excel[:-3]+"csv", 'w', newline='')
+    suffix_length = 3
+    if path_to_excel[-4:] == "xlsx":
+        suffix_length = 4
+    new_csv = open(path_to_excel[:-suffix_length]+"csv", 'w', newline='')
     wr = csv.writer(new_csv)
     for row_num in range(sh.nrows):
         wr.writerow(sh.row_values(row_num))
