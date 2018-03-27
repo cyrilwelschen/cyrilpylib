@@ -48,8 +48,18 @@ def file_list(path, contains=None, suffix=None, contains_any=None, suffix_any=No
         return files
 
 
-def file_info(path):
+def file_info(path, single_string=True):
+    """
+    Function to provide file info as string for e.g. logging.
+    :param path: A valid path to a file.
+    :param single_string: Default True means returns single string for e.g. logging. False returns 3 separate strings,
+           with file size in bytes.
+    :return: String(s) containing modification date, creation date and file size in KB.
+    """
     mod_date = time.ctime(os.path.getmtime(path))
     cre_date = time.ctime(os.path.getctime(path))
     size = os.path.getsize(path)/1024.0
-    return "Last modified: {}\t Created: {}\t Size: {} KB".format(mod_date, cre_date, size)
+    if single_string:
+        return "Last modified: {}\t Created: {}\t Size: {} KB".format(mod_date, cre_date, size)
+    else:
+        return mod_date, cre_date, size*1024
