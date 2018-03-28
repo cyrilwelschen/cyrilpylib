@@ -11,6 +11,10 @@ class PathError(Exception):
 class Database:
 
     def __init__(self, path):
+        """
+        Initialisation of a db handler. The db handler allows to perform the essential db operations.
+        :param path: A valid path (possibly non-existing) to the (to be created or existing) db.
+        """
         assert path[-len(".db"):] == ".db", "Provided path doesn't lead to a .db file"
         try:
             if not os.path.exists(path):
@@ -25,11 +29,20 @@ class Database:
         self.guess_working_table()
 
     def open(self):
+        """
+        Function to reopen a closed db.
+        :return: Nothing is returned.
+        """
         self.con = sql.connect(self.db_path)
         self.c = self.con.cursor()
         self.guess_working_table()
 
     def guess_working_table(self):
+        """
+        Tries to find tables already existing in the db and set 'working_table' attribute accordingly. If no table
+        is found, it is set to 'None' if multiple tables are found, 'working_table' is set "randomly".
+        :return: Nothing is returned.
+        """
         try:
             table_names = self.tables()
             self.working_table = table_names[0]
@@ -37,6 +50,20 @@ class Database:
             self.working_table = None
 
     def create_table(self, table_name, list_of_col_names, list_of_col_types, unique_combination=None):
+        """
+        Creates a new table in the db of the instance if it doesn't already exist. Sets the 'working_table' attribute
+        of the class instance to the newly created table (also if table already existed). If a single column shall be
+        of constraint unique, it can be declared in the column type definition. E.g. "text unique".
+        :param table_name: String of the table name, which is to be created.
+        :param list_of_col_names: List of strings containing the column names to be created.
+        :param list_of_col_types: List of strings. List of same length as list_of_col_names, holding the types of
+        the column at the matching index. Supported types are: 'text', 'integer', 'real', 'blob' (anything at all). For
+        example the 'real' type can also hold a python string. But only if 'real' is specified (instead of 'text' or
+        'blob', the numerical conditions will be correct (e.g. >= 5).
+        :param unique_combination: Optional list of names (which are already present in 'list_of_col_names'). When
+        inserting new elements into the table, the combination of these column's values have to be unique.
+        :return: Nothing is returned.
+        """
         self.working_table = table_name
         create_table_string = self.creation_string(list_of_col_names, list_of_col_types, unique_combination)
         try:
@@ -47,27 +74,45 @@ class Database:
         self.commit()
 
     def check_if_table_exists(self, name):
+        """
+        Function to check if a particular table already exists in the db of the class instance. The 'working_table'
+        class attribute is not changed by this function.
+        :param name: String of the table name for which to check.
+        :return: True or False, depending weather the table already exists.
+        """
         return name in self.tables()
 
     def commit(self):
+        """
+        Function to commit all staged db operations.
+        :return: Nothing is returned.
+        """
         self.con.commit()
 
     def close(self):
+        """
+        Function to close the connection to the db of the instance. Can later be reopened with 'classInstance.open()'.
+        :return: Nothing is returned.
+        """
         self.con.close()
 
     def recreate_table(self, table_to_recreate):
-        self.delete_table(table_to_recreate)
         # todo: continue
         pass
 
-    def create_versioned_table(self):
-        pass
-
     def tables(self):
+        """
+        Function to find out which tables are held by the db.
+        :return: List of strings of the table names.
+        """
         res = self.con.execute("SELECT name FROM sqlite_master WHERE type='table';")
         return [n[0] for n in res]
 
     def tables_with_columns(self):
+        """
+        Function to find out which tables are held by the db and what the column names of the tables are.
+        :return: List of list of strings or single empty list.
+        """
         current_table = self.working_table
         tables = self.tables()
         result = []
