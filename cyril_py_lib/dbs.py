@@ -159,7 +159,10 @@ class Database:
         return prefix + bracket
 
     def write_entry(self, *args):
-        string = "insert into {} values {}".format(self.working_table, self.string_with_spaces(args))
+        if len(args) == 1:
+            string = "insert into {} values ({})".format(self.working_table, self.string_with_spaces(*args)[1:-1])
+        else:
+            string = "insert into {} values {}".format(self.working_table, self.string_with_spaces(args))
         self.execute(string)
 
     def execute(self, string):
@@ -186,6 +189,10 @@ class Database:
         except OperationalError as e:
             print(string)
             raise e
+        return [list(i) for i in self.c.fetchall()]
+
+    def query_string(self, query_string):
+        self.c.execute(query_string)
         return [list(i) for i in self.c.fetchall()]
 
     @staticmethod
