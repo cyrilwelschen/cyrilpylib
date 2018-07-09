@@ -73,7 +73,8 @@ class Database:
             raise e
         self.commit()
 
-    def guess_col_types(self, list_of_col_types):
+    @staticmethod
+    def guess_col_types(list_of_col_types):
         """
         Function to autodetect (guess) types of columns - for table creation - using an example row. Return elements
         can be TEXT and REAL.
