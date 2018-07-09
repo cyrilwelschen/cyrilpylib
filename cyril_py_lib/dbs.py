@@ -73,6 +73,21 @@ class Database:
             raise e
         self.commit()
 
+    def guess_col_types(self, list_of_col_types):
+        """
+        Function to autodetect (guess) types of columns - for table creation - using an example row. Return elements
+        can be TEXT and REAL.
+        :param list_of_col_types: List of an example row. Has to have same length as list_of_col_names.
+        :return: List of db types guess. Can be used in 'create_table'
+        """
+        types = []
+        for e in list_of_col_types:
+            if isinstance(e, (int, float)):
+                types.append("real")
+            else:
+                types.append("text")
+        return types
+
     def check_if_table_exists(self, name):
         """
         Function to check if a particular table already exists in the db of the class instance. The 'working_table'
