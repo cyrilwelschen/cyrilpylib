@@ -37,6 +37,25 @@ class Database:
         self.c = self.con.cursor()
         self.guess_working_table()
 
+    def table(self):
+        """
+        Function to get the name of the current working table.
+        :return: String, name of current working table.
+        """
+        return self.working_table
+
+    def set_table(self, new_table):
+        """
+        Function to change the current working table to new_table. Checks if new_table exists in tables, else throws
+        error.
+        :param new_table: String, name of new table.
+        :return: void
+        """
+        if new_table in self.tables():
+            self.working_table = new_table
+        else:
+            raise KeyError("Suggested table '{}' not in existing tables: {}".format(new_table, str(self.tables())))
+
     def guess_working_table(self):
         """
         Tries to find tables already existing in the db and set 'working_table' attribute accordingly. If no table
@@ -126,7 +145,7 @@ class Database:
 
     def tables_with_columns(self):
         """
-        Function to find out which tables are held by the db and what the column names of the tables are.
+        Informative function to find out which tables are held by the db and what the column names of the tables are.
         :return: List of list of strings or single empty list.
         """
         current_table = self.working_table
@@ -134,7 +153,7 @@ class Database:
         result = []
         for t in tables:
             self.working_table = t
-            result.append([t, self.column_names()])
+            result.append([t, str(self.column_names())])
         self.working_table = current_table
         return result
 
@@ -194,11 +213,29 @@ class Database:
                 raise e
 
     def query_column(self, col_name):
+        """
+        Function to query all elements from one column.
+        :param col_name: Name of the column to query.
+        :return: List of all elements of the queried column.
+        """
         string = "select {} from {}".format(col_name, self.working_table)
         self.execute(string)
         return [r[0] for r in self.c.fetchall()]
 
+    def query_column_uniques(self, col_name):
+        """
+        Function to get the unique entries of a column. Utilises query_column.
+        :param col_name: String, name of the column to query.
+        :return: List of unique elements of the queried column.
+        """
+        return list(set(self.query_column(col_name)))
+
     def query_where(self, *columns_and_values):
+        """
+        Function to collect whole db elements where criteria are met.
+        :param columns_and_values: Unspecified number of string pairs: "col_name>", "value"
+        :return: List of list of whole db elements that match criteria.
+        """
         string = "select * from {} where {}".format(self.working_table, self.string_with_dic_and(*columns_and_values))
         try:
             self.c.execute(string)
@@ -234,6 +271,13 @@ class Database:
             r += str(a)+" "
         return r[:-1]
 
-    def write_entries(self):
-        # todo: implement if necessary
-        pass
+    def write_entries(self, list_of_lists):
+        """
+        Function to write multiple entries at once. Utilises self.write_entry to write.
+        :param list_of_lists: A list containing lists of elements to be inserted into db table.
+        :return: void
+        """
+        for li in list_of_lists:
+            self.write_entry(li)
+
+
